@@ -372,10 +372,10 @@ $(document).ready(function ()
 
 
 	document.getElementById('file').addEventListener('change', onChange);
-//  document.getElementById('moduleRx').addEventListener('change', onModuleRx);
+	//  document.getElementById('moduleRx').addEventListener('change', onModuleRx);
 	// create a Diagram component that wraps the "diagram" canvas
 	diagram = AbstractionLayer.createControl(Diagram, null, null, null, $("#diagram")[0]);
-	diagram.setAllowInplaceEdit(false);
+	diagram.setAllowInplaceEdit(true);
 	diagram.setRouteLinks(true);
 	diagram.setAlignToGrid(true);
 	diagram.setShowGrid(true);
@@ -383,115 +383,140 @@ $(document).ready(function ()
 	diagram.setRoundedLinks(true);
 	diagram.setBounds(new Rect(0, 0, 400, 400));
 	diagram.setBehavior(MindFusion.Diagramming.Behavior.DrawLinks);
-  
+
 
 	//diagram.setSelectAfterCreate(false);
 
 
 
-var glassEffect = new GlassEffect();
-glassEffect.setType(GlassEffectType.Type3);
+	var glassEffect = new GlassEffect();
+	glassEffect.setType(GlassEffectType.Type3);
 
-//diagram.getNodeEffects().push(glassEffect);
+	//diagram.getNodeEffects().push(glassEffect);
 
 	diagram.addEventListener(Events.nodeCreated, onNodeCreated);
 	diagram.addEventListener(Events.linkCreating, onLinkCreating);
-  diagram.addEventListener(Events.linkCreated, onLinkCreated);
-  diagram.addEventListener(Events.linkTextEdited, onLinkTextEdited);
+	diagram.addEventListener(Events.linkCreated, onLinkCreated);
+	diagram.addEventListener(Events.linkTextEdited, onLinkTextEdited);
+	diagram.addEventListener(Events.nodeTextEdited, onNodeTextEdited);
 
 	diagram.addEventListener(Events.nodeSelected, onNodeSelected);
 	diagram.addEventListener(Events.nodeDeselected, onNodeSelected);
-     //create edit node text
+	//create edit node text
 	// diagram.addEventListener(Events.nodeDoubleClicked, createEditControl);
-	 diagram.addEventListener(Events.linkDoubleClicked, OnLinkDoubleClicked);
-	 diagram.addEventListener(Events.containerFolded, onContainerFolded);
-   diagram.addEventListener(Events.containerUnfolded, oncontainerUnfolded);
-   diagram.addEventListener(Events.nodeModifying, onNodeModifying);
+	diagram.addEventListener(Events.linkDoubleClicked, OnLinkDoubleClicked);
+	diagram.addEventListener(Events.containerFolded, onContainerFolded);
+	diagram.addEventListener(Events.containerUnfolded, oncontainerUnfolded);
+	diagram.addEventListener(Events.nodeModifying, onNodeModifying);
 
-	 //diagram.addEventListener(Events.onEnterInplaceEditScript, onEnterInplaceEditScript);
-	 //diagram.addEventListener(Events.onTextEditing, onTextEditing);
-	 //diagram.addEventListener(Events.onTextEdited, onTextEdited);
+	//diagram.addEventListener(Events.onEnterInplaceEditScript, onEnterInplaceEditScript);
+	//diagram.addEventListener(Events.onTextEditing, onTextEditing);
+	//diagram.addEventListener(Events.onTextEdited, onTextEdited);
 	// create an Overview component that wraps the "overview" canvas
 	overview = AbstractionLayer.createControl(Overview,
         null, null, null, $("#overview")[0]);
 	overview.setDiagram(diagram);
 
+	diagram.setModificationStart(MindFusion.Diagramming.ModificationStart.AutoHandles);
+
 	// create an NodeListView component that wraps the "nodeList" canvas
 	nodeList = AbstractionLayer.createControl(NodeListView, null, null, null, $('#nodeList')[0]);
- var shapes=["Circle","Rectangle","Circle"]
-	for (var i=0;i<shapes.length;i++)
+	var shapes = ["Circle", "Rectangle", "Circle"]
+	for (var i = 0; i < shapes.length; i++)
 	{
 		// skip some arrowhead shapes that aren't that useful as node shapes
-		var shape =shapes[i];
-		var text='';
+		var shape = shapes[i];
+		var text = '';
 		var node = new MindFusion.Diagramming.ShapeNode(diagram);
-		if(shape==='Circle'&&i==0){
-			text='Start';
+		if (shape === 'Circle' && i == 0)
+		{
+			text = 'Start';
 			node.setEnableStyledText(true);
 			node.setBrush("lightGreen");
 			node.setText('<b>Start</b>');
 		}
-	if(shape==='Circle'&&i!=0){
-		node.setEnableStyledText(true);
-		node.setBrush("Red");
-		text='End';
-		node.setText('<b>End</b>');
-	}
-	if(shape==='Decision'){
-text='Decision';
-		//node.setText('Decision');
-	}
-		if(shape==='Rectangle'){
-			text='Task';
-	//node.setText('Task');
+		if (shape === 'Circle' && i != 0)
+		{
+			node.setEnableStyledText(true);
+			node.setBrush("Red");
+			text = 'End';
+			node.setText('<b>End</b>');
 		}
-    if(shape==='RoundRect'){
-      text='Rx Module';
-  //node.setText('Task');
-    }
+		if (shape === 'Decision')
+		{
+			text = 'Decision';
+			//node.setText('Decision');
+		}
+		if (shape === 'Rectangle')
+		{
+			text = 'Task';
+			//node.setText('Task');
+		}
+		if (shape === 'RoundRect')
+		{
+			text = 'Rx Module';
+			//node.setText('Task');
+		}
 		node.setShape(shape);
 
 		nodeList.addNode(node, text);
 	}
 
 	nodeList.addEventListener(Events.nodeSelected, onShapeSelected);
-    $('[data-toggle="tab"]').on('click',function(){
-		var nav=$(this).attr('href');
+	$('[data-toggle="tab"]').on('click', function ()
+	{
+		var nav = $(this).attr('href');
 		var itemId = nav.substring(1, nav.length);
-		$('#'+itemId).siblings('.nav-pane').hide();
-		$('#'+itemId).show();
+		$('#' + itemId).siblings('.nav-pane').hide();
+		$('#' + itemId).show();
 		$(this).parent('li').addClass('active');
 		$(this).parent('li').siblings().removeClass('active');
 	})
-	$('input.file').on('change', function(){
-			 		//App.TableDND.tasks.updateModelValues(jq(this).closest('tr'));
-			 		var fileInput = this;
-			 		if(fileInput.files[0]){
-			 			  if(fileInput.files[0].name.endsWith('exe'))
-			 				  {
-			 				   return false;
-			 				  }
-			 			var name = fileInput.files[0].name;
-						if(!diagram.activeItem.activeEditedContent.taskfile)
-						{
-							diagram.activeItem.activeEditedContent.taskfile=[];
-						}else{
-							diagram.activeItem.activeEditedContent.taskfile.push(name);
-						}
+	$('input.file').on('change', function ()
+	{
+		//App.TableDND.tasks.updateModelValues(jq(this).closest('tr'));
+		var fileInput = this;
+		if (fileInput.files[0])
+		{
+			if (fileInput.files[0].name.endsWith('exe'))
+			{
+				return false;
+			}
+			var name = fileInput.files[0].name;
+			if (!diagram.activeItem.activeEditedContent.taskfile)
+			{
+				diagram.activeItem.activeEditedContent.taskfile = [];
+			} else
+			{
+				diagram.activeItem.activeEditedContent.taskfile.push(name);
+			}
 
-			 			$('.selected-list').append('<li>'+name+'</li>');
-			         }
+			$('.selected-list').append('<li>' + name + '</li>');
+		}
 
-			 	});
-				$('.upload').on('click',function()
-						{
-					        $('input.file').trigger('click');
-						});
+	});
+	$('.upload').on('click', function ()
+	{
+		$('input.file').trigger('click');
+	});
 
 
 });
 
+function onNodeTextEdited(sender,e){
+  
+  var selectedNode = e.getNode();
+  if(selectedNode.folder){
+	  
+      diagram.activeItem.resizeFitText(FitSize.KeepRatio); 
+	  diagram.activeItem.resizeToFitChildren();
+  }
+  else{
+	  diagram.activeItem.PolygonalTextLayout = true;
+  diagram.activeItem.resizeToFitText(FitSize.KeepRatio);  
+  }
 
+}
 function onNodeModifying(sender,e){
   var selectedNode = e.getNode();
   if(selectedNode.folded)
@@ -508,28 +533,31 @@ function onContainerFolded(sender, e)
 {
 	var selectedNode = e.getNode();
 
-	if (selectedNode){
-    var rect=selectedNode.bounds.clone();
-    rect.height=selectedNode.getCaptionHeight();
-    rect.width=selectedNode.unfoldedSize.width;
-		selectedNode.setBounds(rect);
-		
-  }
+	if (selectedNode)
+	{
+		var rect = selectedNode.bounds.clone();
+		rect.height = selectedNode.getCaptionHeight();
+		rect.width = selectedNode.unfoldedSize.width;
+		selectedNode.setBounds(rect, true);
+	}
 
+	applyLayeredLayout();
 }
 
 function oncontainerUnfolded(sender, e)
 {
 	var selectedNode = e.getNode();
-	if (selectedNode){
-    if(selectedNode.getCaptionHeight()===20)
-		selectedNode.setBounds(new Rect(selectedNode.getBounds().x,selectedNode.getBounds().y,selectedNode.getBounds().width,selectedNode.getBounds().height));
-  }else{
-    selectedNode.setBounds(new Rect(selectedNode.getBounds().x,selectedNode.getBounds().y,selectedNode.getBounds().width,selectedNode.getBounds().height+selectedNode.getCaptionHeight()));
-  }
-  selectedNode.resizeToFitChildren();
-  
+	if (selectedNode)
+	{
+		if (selectedNode.getCaptionHeight() === 20)
+			selectedNode.setBounds(new Rect(selectedNode.getBounds().x, selectedNode.getBounds().y, selectedNode.getBounds().width, selectedNode.getBounds().height));
+	} else
+	{
+		selectedNode.setBounds(new Rect(selectedNode.getBounds().x, selectedNode.getBounds().y, selectedNode.getBounds().width, selectedNode.getBounds().height + selectedNode.getCaptionHeight()));
+	}
+	selectedNode.resizeToFitChildren();
 
+	applyLayeredLayout();
 }
 
 
@@ -631,6 +659,7 @@ function onLinkCreated(sender, args)
   link.points[link.points.length - 1].y = origin.y;
   update = true;
  }
+ link.setShape(MindFusion.Diagramming.LinkShape.Cascading);
  if (update)
  {
   link.updateFromPoints();
@@ -1047,10 +1076,17 @@ function print()
 
 function applyLayeredLayout()
 {
-var layout = new MindFusion.Graphs.LayeredLayout();
-layout.direction = MindFusion.Graphs.LayoutDirection.TopToBottom;
-layout.nodeDistance  = 40;
-diagram.arrange(layout);
+	var layout = new MindFusion.Graphs.LayeredLayout();
+	layout.direction = MindFusion.Graphs.LayoutDirection.TopToBottom;
+	layout.nodeDistance  = 40;
+	diagram.arrange(layout);
+
+	for (var l = 0; l < diagram.links.length; l++)
+	{
+		var link = diagram.links[l];
+		link.setShape(MindFusion.Diagramming.LinkShape.Cascading);
+	}
+	diagram.routeAllLinks();
 }
 
 function group()
@@ -1076,9 +1112,15 @@ function group()
 		container.setCaptionHeight(20);
 		container.setFoldIconSize(7);
 		container.resizeToFitChildren();
+		var apat = new AnchorPattern([
+  new AnchorPoint(50, 0, true, true),
+  new AnchorPoint(100, 50, true, true),
+  new AnchorPoint(50, 100, true, true),
+  new AnchorPoint(0, 50, true, true)]);
+container.setAnchorPattern(apat);
 		applyLayeredLayout();
-		//container.setHandlesStyle(HandlesStyle.HatchHandles3);
-
+		container.setHandlesStyle(HandlesStyle.HatchHandles3);
+		container.setHandlesStyle(HandlesStyle.DashFrame);
 }
 
 
